@@ -45,7 +45,14 @@ userinput="${1}"
 
 # Allows for testing not on Travis CI.
 # if using travis for tests
-if [ -z "${TRAVIS}" ]; then
+if [ -n "${TRAVIS}" ]||[ -n "${GITHUB_ACTIONS}" ]; then
+	selfname="travis"
+	if [ -n "${GITHUB_ACTIONS}" ]; then
+		TRAVIS_BRANCH="develop"
+		TRAVIS_BUILD_DIR="${rootdir}"
+	fi
+# if not using travis for tests
+else
 	TRAVIS_BRANCH="develop"
 	TRAVIS_BUILD_DIR="${rootdir}"
 fi

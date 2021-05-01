@@ -1,0 +1,110 @@
+# This is a basic workflow to help you get started with Actions
+
+name: jc2server
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: push
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+          node-version: '14'
+    - run: npm install gamedig -g
+    # Runs a single command using the runners shell
+    - name: linuxgsm.sh pre-test setup
+      run: chmod +x lgsm/functions/*
+    - name: ./linuxgsm.sh (get-opt)
+      run: bash ./linuxgsm.sh
+    - name: ./linuxgsm.sh list
+      run: bash ./linuxgsm.sh list
+    - name: ./linuxgsm.sh jc2server
+      run: bash ./linuxgsm.sh jc2server
+    - name: ./jc2server (get-opt)
+      run: bash ./jc2server
+    - name: ./jc2server dev
+      run: bash ./jc2server dev
+    # Install
+    - name: ./jc2server auto-install
+      run: bash ./jc2server auto-install
+    # Speed up messages
+    - name: Speed up message display
+      run: echo "sleeptime=\"0.1\"" > lgsm/config-lgsm/jc2server/common.cfg
+    # Start. Stop, Restart
+    - name: ./jc2server start (no ip set)
+      run: bash ./jc2server start
+    - name: ./jc2server start (already online)
+      run: bash .github/exitcode.sh "./jc2server start" "2"
+    - name: ./jc2server restart
+      run: bash ./jc2server restart
+    - name: ./jc2server stop
+      run: bash ./jc2server stop
+    - name: ./jc2server restart (server offline)
+      run: bash ./jc2server restart
+    # update
+    - name: ./jc2server update (no update required)
+      run: bash ./jc2server update
+    - name: ./jc2server update (update required - online)
+      run: |
+        sed -i 's/[0-9]\+/0/' "serverfiles/steamapps/appmanifest_261140.acf"
+        bash ./jc2server update
+    - name: ./jc2server update (remove appmanifest file)
+      run: |
+        rm --verbose "serverfiles/steamapps/appmanifest_261140.acf"
+        bash ./jc2server update
+    - name: ./jc2server force-update (online)
+      run: bash ./jc2server force-update
+    - name: ./jc2server validate (online)
+      run: bash ./jc2server validate
+    - name: Simulate out-of-date modules
+      run: |
+        echo "#test" >> lgsm/tmp/linuxgsm.sh
+        echo "#test" >> lgsm/config-default/config-lgsm/jc2server/_default.cfg
+        echo "#test" >> lgsm/functions/alert.sh
+    - name: ./jc2server update-lgsm
+      run: bash ./jc2server update-lgsm
+    # monitor
+    - name: ./jc2server monitor (offline)
+      run: |
+        bash ./jc2server stop
+        bash .github/exitcode.sh "./jc2server monitor" "2"
+    - name: ./jc2server monitor (offline with lockfile)
+      run: |
+        date '+%s' > "lgsm/lock/jc2server.lock"
+        bash ./jc2server monitor
+    - name: ./jc2server monitor (online)
+      run: |
+        bash ./jc2server monitor
+    - name: ./jc2server test-alert
+      run: |
+        bash .github/exitcode.sh "./jc2server test-alert" "3"
+    # details
+    - name: ./jc2server details
+      run: bash ./jc2server details
+    - name: ./jc2server postdetails
+      run: bash ./jc2server postdetails
+    # Backup
+    - name: ./jc2server backup
+      run: bash ./jc2server backup
+    # Dev Tools
+    - name: ./jc2server detect-glibc
+      run: bash ./jc2server detect-glibc
+    - name: ./jc2server detect-ldd
+      run: bash ./jc2server detect-ldd
+    - name: ./jc2server detect-deps
+      run: bash ./jc2server detect-deps
+    - name: ./jc2server query-raw
+      run: bash ./jc2server query-raw
+    # Donate
+    - name: ./jc2server donate
+      run: bash ./jc2server donate
